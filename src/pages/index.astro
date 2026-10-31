@@ -1,0 +1,40 @@
+---
+//index.astro
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Connect from '@/components/other/Connect.astro';
+// import Scrobble from '@/components/other/Scrobble.astro';
+import TopAlbum from '@/components/other/TopAlbum.astro';
+
+const pageTitle = ``;
+---
+
+<BaseLayout hasOwnTitle={true} pageTitle={pageTitle} mainClass="homepage">
+    <article class="prose flow">
+        <h1>Welll, hi!</h1>
+        <p>
+            I'm Flipse, and this is my little corner of the internet. I don't know what this will
+            be yet, but I'm a little excited.
+        </p>
+    </article>
+
+    <Connect />
+
+    <hr />
+
+    <TopAlbum />
+</BaseLayout>
+<style>
+    h1 {
+        font-size: inherit;
+        font-stretch: 100%;
+        margin-block-end: inherit;
+        display: inline;
+        line-height: inherit;
+        text-wrap: balance;
+        font-weight: inherit;
+        margin-inline-end: var(--space-xs);
+    }
+    h1 + p {
+        display: inline;
+    }
+</style>

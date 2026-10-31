@@ -1,0 +1,40 @@
+---
+// BaseLayout.astro
+
+import BaseHead from '@/components/base/BaseHead.astro';
+import Header from '@/components/base/Header.astro';
+import Footer from '@/components/base/Footer.astro';
+
+import { siteDescription } from '@/assets/data/site-desc';
+
+const {
+    pageTitle = 'flipse.town',
+    seoTitle,
+    pageDescription = siteDescription,
+    pageImage = '/social-default.png',
+    mainClass = '',
+    hasOwnTitle = false,
+} = Astro.props;
+---
+
+<html lang="en" transition:name="root" transition:animate="none">
+    <head>
+        <BaseHead
+            title={seoTitle ?? pageTitle}
+            description={pageDescription}
+            image={pageImage}
+        />
+    </head>
+    <body>
+        <div class="shell">
+            <Header />
+            <main class:list={[mainClass]}>
+                <section class="main-content" transition:animate="fade">
+                    {!hasOwnTitle && pageTitle && <h1>{pageTitle}</h1>}
+                    <slot />
+                </section>
+            </main>
+            <Footer />
+        </div>
+    </body>
+</html>

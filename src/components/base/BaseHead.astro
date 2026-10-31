@@ -1,0 +1,128 @@
+---
+// BaseHead.astro
+import { ClientRouter } from 'astro:transitions';
+import '@/assets/styles/global.css';
+
+export interface Props {
+    title: string;
+    description?: string;
+    image?: string;
+}
+
+const { title, description, image } = Astro.props;
+
+const ogImage = image ? new URL(image, Astro.site) : new URL('/social-default.png', Astro.site);
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!-- 
+
+
+        ∵*.•´¸.•*´✶´♡
+        ° ☆ °˛*˛☆_Π______*˚☆*
+        ˚ ˛★˛•˚*/______/ ~⧹。˚˚
+        ˚ ˛•˛•˚ ｜ 田田 ｜門｜ ˚*
+                =╬╬=╬╬=╬╬=╬╬=
+
+    Welcome to my place on the internet.
+    I hope you don't mind the mess, I'm trying my hardest.
+
+    ¯\_(ツ)_/¯
+
+
+ -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width" />
+
+<title>flipse.town{title ? ` | ${title}` : ''}</title>
+
+<script is:inline>
+    (() => {
+        const root = document.documentElement;
+        const storageKey = 'theme-mode';
+        const order = ['light', 'system', 'dark'];
+        const mql = window.matchMedia('(prefers-color-scheme: dark)');
+        const labels = { light: 'Light theme', system: 'System theme', dark: 'Dark theme' };
+
+        let direction = 'forward';
+
+        const getMode = () => {
+            const stored = localStorage.getItem(storageKey);
+            return order.includes(stored) ? stored : 'system';
+        };
+
+        const resolveTheme = (mode) => {
+            if (mode === 'system') return mql.matches ? 'dark' : 'light';
+            return mode;
+        };
+
+        const applyToRoot = (target, mode) => {
+            const theme = resolveTheme(mode);
+            target.setAttribute('data-theme', theme);
+            target.setAttribute('data-theme-mode', mode);
+            target.style.colorScheme = theme;
+            target.dataset.ready = 'true';
+        };
+
+        const syncButtons = () => {
+            const label = labels[getMode()];
+            document.querySelectorAll('.theme-toggle').forEach((btn) => {
+                btn.setAttribute('aria-label', label);
+                btn.title = label;
+            });
+        };
+
+        const switchMode = (mode) => {
+            root.classList.add('no-transition');
+            applyToRoot(root, mode);
+            syncButtons();
+            setTimeout(() => root.classList.remove('no-transition'), 50);
+        };
+
+        applyToRoot(root, getMode());
+
+        document.addEventListener('astro:before-swap', (event) => {
+            applyToRoot(event.newDocument.documentElement, getMode());
+        });
+
+        document.addEventListener('astro:page-load', syncButtons);
+
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.theme-toggle')) return;
+
+            const i = order.indexOf(getMode());
+
+            if (i === 0) direction = 'forward';
+            if (i === order.length - 1) direction = 'backward';
+
+            const next = order[direction === 'forward' ? i + 1 : i - 1];
+            localStorage.setItem(storageKey, next);
+            switchMode(next);
+        });
+
+        mql.addEventListener('change', () => {
+            if (getMode() === 'system') switchMode('system');
+        });
+    })();
+</script>
+
+<ClientRouter />
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/manifest.webmanifest" />
+
+<link rel="canonical" href={canonicalURL} />
+
+<meta name="generator" content={Astro.generator} />
+<meta name="color-scheme" content="dark light" />
+
+<link rel="alternate" type="application/rss+xml" title="flipse.town RSS Feed" href="/rss.xml" />
+
+{description && <meta name="description" content={description} />}
+
+<meta property="og:type" content="website" />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title || 'flipse.town'} />
+{description && <meta property="og:description" content={description} />}
+<meta property="og:image" content={ogImage} />

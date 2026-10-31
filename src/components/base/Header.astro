@@ -1,0 +1,105 @@
+---
+//Header.astro
+import ThemeToggle from '@/components/base/ThemeToggle.astro';
+
+const current = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isActive = (path: string) => current === path;
+---
+
+<header>
+    <ThemeToggle />
+    <a class="home" href="/" aria-current={isActive('/') ? 'page' : undefined}>flipse.town</a>
+    <p class="desc">It's a post-people-pleaser path, and it's rocky.</p>
+
+    <nav class="main" aria-label="Main links">
+        <ul>
+            <li>
+                <a href="/" aria-current={isActive('/') ? 'page' : undefined}>Home</a>
+            </li>
+            <li>
+                <a href="/now" aria-current={isActive('/now') ? 'page' : undefined}>Now</a>
+            </li>
+            <li>
+                <a href="/weblog" aria-current={isActive('/weblog') ? 'page' : undefined}>Log</a>
+            </li>
+            <li>
+                <a href="/about" aria-current={isActive('/about') ? 'page' : undefined}>About</a>
+            </li>
+            <li>
+                <a href="/uses" aria-current={isActive('/uses') ? 'page' : undefined}>Uses</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<style>
+    header {
+        display: grid;
+        gap: var(--space-sm);
+        grid-template-areas:
+            'theme'
+            'home'
+            'desc'
+            'links';
+        grid-template-columns: 1fr;
+        align-items: center;
+        margin-block-end: clamp(3.25rem, 8vw, 6rem);
+    }
+    :global(button.theme-toggle) {
+        margin-left: auto;
+    }
+    .home {
+        grid-area: home;
+        font-family: var(--font-family--body);
+        font-stretch: 75%;
+        text-wrap: pretty;
+        font-weight: 550;
+        font-size: var(--text-xxl);
+    }
+
+    p.desc {
+        grid-area: desc;
+        font-family: var(--font-family--mono);
+        font-size: var(--text-xs);
+        font-weight: 500;
+        margin-block-start: var(--space-4px);
+    }
+    nav.main {
+        grid-area: links;
+    }
+    :global(button.theme-toggle) {
+        grid-area: theme;
+    }
+    nav.main ul {
+        display: flex;
+        font-family: var(--font-family--mono);
+        gap: var(--space-md);
+        font-size: var(--text-sm);
+        font-weight: 500;
+    }
+    nav.main a {
+        color: var(--text-muted);
+    }
+    nav.main a:hover {
+        color: var(--accent);
+    }
+    nav.main a[aria-current='page'] {
+        color: var(--text);
+    }
+
+    @media (min-width: 46rem) {
+        header {
+            grid-template-areas: 'home links theme' 'desc desc desc';
+            grid-template-columns: auto 1fr auto;
+            gap: 0;
+        }
+
+        nav.main ul {
+            justify-content: flex-end;
+        }
+
+        :global(button.theme-toggle) {
+            margin-inline-start: var(--space-lg);
+        }
+    }
+</style>

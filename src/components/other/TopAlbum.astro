@@ -1,0 +1,185 @@
+---
+// TopAlbum.astro
+interface Props {
+    class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<h2>My most played album last week</h2>
+
+<div class:list={['top-album', className]}>
+    <a
+        class="info"
+        href="https://listenbrainz.org/user/flipse"
+        target="_blank"
+        rel="noopener noreferrer">
+        <span class="title">Loading top album…</span>
+        <span class="artist"></span>
+    </a>
+    <div class="record"></div>
+    <div class="shelf"></div>
+</div>
+
+<style>
+    :global(html[data-theme='light']) {
+        --shelf-highlight: oklch(79% 0.06 72.64);
+        --shelf: oklch(50% 0.07 72);
+    }
+
+    :global(html[data-theme='dark']) {
+        --shelf-highlight: oklch(59% 0.065 72);
+        --shelf: oklch(26.5% 0.02 72.37);
+    }
+    h2 {
+        font-weight: 400;
+        font-family: var(--font-family--mono);
+        letter-spacing: inherit;
+        font-size: var(--text-sm);
+        margin-block-end: var(--space-xl);
+    }
+    .top-album {
+        --album-size: 11.25rem;
+        position: relative;
+        width: var(--album-size);
+        height: var(--album-size);
+    }
+
+    .info {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: var(--space-xs);
+        padding: var(--space-xs);
+        text-align: center;
+        overflow: hidden;
+        background-color: var(--bg-alt);
+        border: var(--space-1px) solid var(--border);
+        border-radius: var(--space-3px);
+    }
+
+    .title {
+        font-size: var(--text-xl);
+        font-stretch: 75%;
+        line-height: var(--leading-heading);
+        text-wrap: balance;
+        font-weight: 550;
+    }
+
+    .artist {
+        font-family: var(--font-family--mono);
+        font-size: var(--text-xs);
+        font-weight: 500;
+    }
+
+    .record {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 0;
+        width: calc(var(--album-size) - var(--space-4px) * 2);
+        margin-block-start: var(--space-4px);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background:
+            linear-gradient(#343332b3, #343332b3),
+            repeating-radial-gradient(
+                #3a3837,
+                #3a3837 0.25rem,
+                #979797 0.3125rem,
+                #3a3837 0.375rem
+            );
+        translate: calc(var(--album-size) / 6);
+        transition: translate 0.68s
+            linear(0, 0.529 23.2%, 0.945 51.2%, 0.999 57.6%, 0.958 70.8%, 1);
+    }
+
+    .record::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 3.5rem;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        border: solid var(--space-1px) color-mix(in srgb, var(--accent) 72%, var(--bg) 28%);
+        background: var(--bg);
+        box-shadow:
+            0 0 0 6px var(--accent),
+            inset 0 0 0 19px var(--accent);
+    }
+
+    .top-album:hover .record {
+        translate: calc(var(--album-size) / 2);
+        transition: translate var(--transition-ease);
+    }
+
+    .shelf {
+        position: absolute;
+        top: var(--album-size);
+        left: -0.75rem;
+        width: calc(100% + 0.75rem * 2);
+        height: 1.25rem;
+        background:
+            linear-gradient(0deg, var(--shelf) 51%, var(--shelf-highlight) 100%), var(--shelf);
+        will-change: transform;
+        border-radius: var(--space-4px) var(--space-4px) var(--space-xs) var(--space-xs);
+        z-index: -1;
+    }
+
+    .shelf::before,
+    .shelf::after {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        width: 0.25rem;
+        height: 0.5rem;
+        background-color: color-mix(in oklch, var(--shelf) 45%, var(--shelf-highlight) 55%);
+        transform: perspective(2px) rotateX(7deg) rotateY(0);
+        border-radius: var(--space-1px) var(--space-1px) 0 0;
+        margin-bottom: var(--space-1px);
+    }
+    .shelf::before {
+        left: 0.375rem;
+    }
+    .shelf::after {
+        right: 0.375rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('astro:page-load', async () => {
+        const box = document.querySelector('.top-album');
+        if (!box) return;
+
+        const title = box.querySelector<HTMLElement>('.title');
+        const artist = box.querySelector<HTMLElement>('.artist');
+        if (!title || !artist) return;
+
+        try {
+            const res = await fetch(
+                'https://api.listenbrainz.org/1/stats/user/flipse/release-groups?range=week&count=1',
+            );
+
+            if (res.status === 204) {
+                title.textContent = 'No top album yet';
+                return;
+            }
+
+            const album = (await res.json()).payload.release_groups?.[0];
+            if (!album) {
+                title.textContent = 'No top album yet';
+                return;
+            }
+
+            title.textContent = album.release_group_name;
+            artist.textContent = album.artist_name;
+        } catch (e) {
+            console.error('Failed to fetch ListenBrainz data:', e);
+            title.textContent = 'Could not load top album';
+        }
+    });
+</script>
